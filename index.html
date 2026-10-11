@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#5b35c9">
+<title>Preço Perto — encontre e compare preços</title>
+<style>
+  :root {
+    --purple:#5b35c9; --purple-dark:#43239e; --ink:#202033; --muted:#6e7084;
+    --bg:#f6f5fb; --card:#fff; --line:#e9e7f2; --green:#138a54; --yellow:#fff3c4;
+    --radius:18px; --shadow:0 8px 26px rgba(40,25,90,.07);
+  }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { margin:0; font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif; background:var(--bg); color:var(--ink); }
+  button,input,select { font:inherit; }
+  button { cursor:pointer; }
+  .app { width:min(100%,1120px); margin:0 auto; padding:0 18px 100px; }
+  header { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:22px 0 16px; }
+  .brand { display:flex; align-items:center; gap:10px; min-width:0; }
+  .brand-mark { width:43px;height:43px;border-radius:14px;background:linear-gradient(135deg,#7d5be8,#4c2ab5);display:grid;place-items:center;color:white;font-size:22px;font-weight:900;box-shadow:0 6px 16px #5b35c933; }
+  .brand h1 { font-size:20px; line-height:1.05; margin:0; letter-spacing:-.5px; }
+  .brand p { margin:4px 0 0; color:var(--muted);font-size:12px; }
+  .location { border:1px solid var(--line); background:#fff; border-radius:999px; padding:10px 13px; color:#34334b; font-size:13px; display:flex;align-items:center;gap:7px; white-space:nowrap; }
+  .hero { background:linear-gradient(120deg,#3e208e,#6845d6 72%,#8768e9); color:white; border-radius:25px; padding:26px; position:relative; overflow:hidden; }
+  .hero:after { content:"";position:absolute;width:210px;height:210px;border:34px solid #ffffff12;border-radius:50%;right:-55px;top:-75px; }
+  .eyebrow { font-size:12px; text-transform:uppercase; letter-spacing:1.3px; opacity:.8; font-weight:700; }
+  .hero h2 { font-size:clamp(25px,4vw,36px);line-height:1.08;letter-spacing:-1px;max-width:520px;margin:10px 0; }
+  .hero p { color:#e5ddff;max-width:510px;margin:0 0 20px;font-size:14px;line-height:1.5; }
+  .search { display:flex; gap:8px; position:relative;z-index:1; max-width:700px; }
+  .search input { flex:1;min-width:0;border:0;border-radius:13px;padding:15px 16px;outline:0;color:var(--ink); }
+  .primary { border:0;background:#f5c84c;color:#2d2450;font-weight:800;border-radius:13px;padding:0 20px; }
+  .primary:hover { filter:brightness(.97); }
+  .quick-filters { display:flex;gap:8px;overflow-x:auto;padding:14px 0 4px;scrollbar-width:none; }
+  .chip { border:1px solid var(--line);background:white;color:#57566c;padding:9px 13px;border-radius:999px;white-space:nowrap;font-size:13px; }
+  .chip.active { background:#eee8ff;color:var(--purple);border-color:#d8ccff;font-weight:700; }
+  .section-head { display:flex;align-items:end;justify-content:space-between;gap:12px;margin:27px 0 13px; }
+  .section-head h3 { margin:0;font-size:20px;letter-spacing:-.4px; }
+  .section-head p { margin:5px 0 0;color:var(--muted);font-size:13px; }
+  .text-button { border:0;background:transparent;color:var(--purple);font-weight:700;font-size:13px;padding:8px 0; }
+  .ad-slot { border:1px dashed #c9c3dc;background:#f0edf8;border-radius:14px;min-height:74px;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;color:#89839e;font-size:12px;margin:22px 0; }
+  .ad-slot strong { display:block;color:#706985;font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px; }
+  .product-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px; }
+  .product { background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:15px;box-shadow:var(--shadow);min-width:0; }
+  .product-top { display:flex;justify-content:space-between;gap:8px;align-items:start; }
+  .product-emoji { width:47px;height:47px;border-radius:14px;background:#f3efff;display:grid;place-items:center;font-size:25px; }
+  .fav { border:0;background:transparent;color:#aaa5ba;font-size:22px;padding:0;line-height:1; }
+  .fav.on { color:#e34b79; }
+  .product h4 { margin:13px 0 4px;font-size:15px;line-height:1.25; }
+  .product .detail { color:var(--muted);font-size:12px;margin:0 0 14px; }
+  .best-price { display:flex;align-items:baseline;gap:6px;flex-wrap:wrap; }
+  .price { font-size:23px;font-weight:850;letter-spacing:-.7px; }
+  .save { font-size:10px;font-weight:800;color:var(--green);background:#e4f7ed;padding:4px 6px;border-radius:6px; }
+  .market-line { display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:11px;margin:8px 0 12px; }
+  .compare-btn { width:100%;border:1px solid #d9d0fa;background:#f6f2ff;color:var(--purple);border-radius:10px;padding:10px 8px;font-weight:750;font-size:12px; }
+  .compare-panel { display:none;background:white;border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:12px; }
+  .compare-panel.open { display:block; }
+  .compare-row { display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px; }
+  .compare-row:last-child { border-bottom:0; }
+  .compare-row strong { white-space:nowrap; }
+  .layout-two { display:grid;grid-template-columns:1.15fr .85fr;gap:15px;align-items:start; }
+  .panel { background:white;border:1px solid var(--line);border-radius:var(--radius);padding:18px; }
+  .panel h3 { margin:0 0 5px;font-size:18px; }
+  .panel .sub { margin:0 0 15px;color:var(--muted);font-size:12px; }
+  .list-entry { display:flex;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line); }
+  .list-entry:last-child { border-bottom:0; }
+  .list-entry input[type=checkbox] { width:18px;height:18px;accent-color:var(--purple); }
+  .list-entry .item-name { flex:1;font-size:13px; }
+  .list-entry .item-price { font-weight:800;font-size:13px;white-space:nowrap; }
+  .add-list { display:flex;gap:7px;margin-top:12px; }
+  .add-list input { flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:11px; }
+  .add-list button { border:0;border-radius:10px;background:var(--purple);color:white;padding:0 14px;font-weight:750; }
+  .market-card { display:flex;align-items:center;gap:11px;padding:12px 0;border-bottom:1px solid var(--line); }
+  .market-card:last-child { border:0; }
+  .market-icon { width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:#f3f1f8;font-size:20px; }
+  .market-info { flex:1;min-width:0; }
+  .market-info strong { display:block;font-size:13px; }
+  .market-info small { display:block;color:var(--muted);font-size:11px;margin-top:3px; }
+  .market-distance { font-size:12px;font-weight:800;white-space:nowrap; }
+  .note { font-size:11px;color:var(--muted);line-height:1.5;margin-top:13px; }
+  footer { text-align:center;color:var(--muted);font-size:11px;padding:28px 0 10px; }
+  .bottom-nav { display:none; }
+  .toast { position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#27213b;color:white;padding:11px 16px;border-radius:999px;font-size:13px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .2s;z-index:10; }
+  .toast.show { opacity:1; }
+  @media(max-width:760px) {
+    .app { padding:0 13px 90px; }
+    header { padding:16px 0 13px; }
+    .location { padding:9px 10px;font-size:12px; }
+    .hero { padding:22px 18px;border-radius:21px; }
+    .hero h2 { max-width:370px; }
+    .product-grid { grid-template-columns:repeat(2,minmax(0,1fr));gap:10px; }
+    .product { padding:12px; }
+    .layout-two { grid-template-columns:1fr; }
+    .bottom-nav { position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:space-around;gap:4px;background:#ffffffed;backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:9px 5px calc(9px + env(safe-area-inset-bottom));z-index:5; }
+    .bottom-nav button { border:0;background:transparent;color:#77748b;font-size:10px;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:54px; }
+    .bottom-nav span { font-size:19px; }
+    .bottom-nav button.active { color:var(--purple);font-weight:800; }
+  }
+  @media(max-width:380px) {
+    .app { padding-left:10px;padding-right:10px; }
+    .brand h1 { font-size:17px; }
+    .brand-mark { width:38px;height:38px; }
+    .location { font-size:11px; }
+    .hero { padding:19px 14px; }
+    .search { flex-direction:column; }
+    .search .primary { min-height:44px; }
+    .product-grid { gap:8px; }
+    .product { padding:10px; }
+    .price { font-size:20px; }
+  }
+
+  /* Refinamento visual profissional */
+  :root {
+    --purple:#4f35c9; --purple-dark:#35218f; --ink:#19172b; --muted:#77758b;
+    --bg:#f7f7fb; --card:#fff; --line:#e8e7f0; --green:#087f5b;
+    --radius:20px; --shadow:0 10px 30px rgba(31,24,74,.055);
+  }
+  body { background:#f7f7fb; letter-spacing:-.12px; }
+  .app { max-width:1180px; }
+  header { padding:25px 0 19px; }
+  .brand-mark { border-radius:15px; background:linear-gradient(145deg,#7657ee,#4425b8); box-shadow:0 7px 18px #4f35c926; }
+  .brand h1 { font-size:21px; letter-spacing:-.8px; font-weight:850; }
+  .brand p { font-size:12px; letter-spacing:0; }
+  .location { border-color:#e5e3ef; padding:11px 14px; box-shadow:0 2px 8px #2b1c6b08; }
+  .hero { padding:34px; border-radius:28px; background:radial-gradient(circle at 92% 5%,#8a73ef 0,transparent 30%),linear-gradient(115deg,#30206f,#5637c7 72%,#6748d5); box-shadow:0 15px 35px #4830a31c; }
+  .hero:after { width:250px;height:250px;right:-75px;top:-95px;border-width:40px; }
+  .eyebrow { letter-spacing:1.8px; font-size:11px; }
+  .hero h2 { font-size:clamp(29px,4vw,42px); line-height:1.04; letter-spacing:-1.6px; max-width:570px; margin:13px 0 12px; }
+  .hero p { font-size:14px; line-height:1.65; max-width:540px; }
+  .search { max-width:740px; gap:10px; }
+  .search input { padding:16px 18px; border-radius:14px; box-shadow:0 3px 12px #24134b12; }
+  .primary { padding:0 24px; border-radius:14px; background:#ffd66d; transition:transform .15s,filter .15s; }
+  .primary:active { transform:scale(.98); }
+  .quick-filters { padding:17px 0 5px; gap:9px; }
+  .chip { padding:10px 15px; border-color:#e7e5ef; font-weight:600; transition:background .15s,border-color .15s; }
+  .chip.active { background:#eeeaff; border-color:#d8ceff; color:#4f35c9; }
+  .section-head { margin:32px 0 16px; }
+  .section-head h3 { font-size:21px; letter-spacing:-.65px; }
+  .section-head p { font-size:12px; }
+  .text-button { cursor:pointer; }
+  .product-grid { gap:15px; }
+  .product { padding:17px; border-radius:20px; box-shadow:0 5px 20px rgba(37,26,84,.035); transition:transform .18s,box-shadow .18s,border-color .18s; }
+  .product:hover { transform:translateY(-2px); box-shadow:0 12px 28px rgba(37,26,84,.075); border-color:#dcd6f6; }
+  .product-emoji { width:49px;height:49px;border-radius:16px;background:linear-gradient(145deg,#f4f0ff,#ece7ff); }
+  .fav { width:34px;height:34px;border-radius:50%;background:#f8f7fc;font-size:20px; }
+  .fav.on { background:#fff0f4; }
+  .product h4 { font-size:15px; font-weight:800; margin-top:15px; }
+  .product .detail { min-height:30px; line-height:1.45; }
+  .price { font-size:25px; letter-spacing:-1px; }
+  .save { letter-spacing:.35px; }
+  .market-line { min-height:28px; line-height:1.45; }
+  .compare-btn { border-radius:12px; padding:11px 10px; background:#f5f2ff; border-color:#e2dbff; transition:background .15s,transform .15s; }
+  .compare-btn:hover { background:#ece6ff; }
+  .panel { border-radius:21px; padding:21px; box-shadow:0 5px 22px rgba(37,26,84,.035); }
+  .panel h3 { letter-spacing:-.5px; }
+  .ad-slot { border-radius:16px; background:#f2f0f8; margin:25px 0; }
+  footer { padding-top:32px; }
+  .bottom-nav { box-shadow:0 -5px 24px #21154b0a; }
+  .toast { border-radius:14px; padding:13px 18px; }
+  /* Modal de comparação */
+  .modal-backdrop { position:fixed; inset:0; z-index:30; display:none; align-items:center; justify-content:center; padding:18px; background:rgba(20,16,43,.55); backdrop-filter:blur(7px); }
+  .modal-backdrop.open { display:flex; }
+  .compare-modal { width:min(100%,480px); max-height:min(82vh,700px); overflow:auto; background:#fff; border:1px solid #ffffff80; border-radius:24px; box-shadow:0 25px 90px #100b2b55; padding:22px; animation:modalIn .18s ease-out; }
+  @keyframes modalIn { from { opacity:0; transform:translateY(10px) scale(.985); } to { opacity:1; transform:translateY(0) scale(1); } }
+  .modal-header { display:flex; align-items:flex-start; justify-content:space-between; gap:15px; margin-bottom:17px; }
+  .modal-heading { display:flex; align-items:center; gap:12px; min-width:0; }
+  .modal-product-icon { width:50px;height:50px; flex:0 0 auto; display:grid;place-items:center;border-radius:16px;background:#f0ebff;font-size:27px; }
+  .modal-header h3 { margin:0; font-size:20px; letter-spacing:-.7px; }
+  .modal-header p { margin:5px 0 0;color:var(--muted);font-size:12px; }
+  .modal-close { width:36px;height:36px;flex:0 0 auto;border:0;border-radius:50%;background:#f3f2f8;color:#55516b;font-size:22px;line-height:1; }
+  .modal-best { display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 15px;border-radius:15px;background:#edf9f2;margin-bottom:14px; }
+  .modal-best span { color:#276b4c;font-size:12px;font-weight:700; }
+  .modal-best strong { color:#087f5b;font-size:22px;letter-spacing:-.6px; }
+  .modal-market-row { display:flex;align-items:center;gap:11px;padding:14px 2px;border-bottom:1px solid var(--line); }
+  .modal-market-row:last-child { border-bottom:0; }
+  .market-rank { width:34px;height:34px;display:grid;place-items:center;border-radius:11px;background:#f4f2fa;color:#5e5875;font-size:12px;font-weight:800;flex:0 0 auto; }
+  .modal-market-row.winner .market-rank { background:#dff5e8;color:#087f5b; }
+  .modal-market-name { flex:1;min-width:0;font-size:13px;font-weight:700; }
+  .modal-market-name small { display:block;color:var(--muted);font-weight:400;font-size:11px;margin-top:4px; }
+  .modal-market-price { text-align:right;white-space:nowrap;font-size:15px;font-weight:850; }
+  .modal-market-row.winner .modal-market-price { color:#087f5b; }
+  .modal-footnote { color:var(--muted);font-size:11px;line-height:1.5;margin:15px 0 0;padding-top:13px;border-top:1px solid var(--line); }
+  @media(max-width:760px) {
+    header { padding-top:17px; }
+    .hero { padding:26px 21px; }
+    .product-grid { gap:11px; }
+    .product { padding:13px; }
+    .panel { padding:17px; }
+    .compare-modal { border-radius:22px; padding:19px; }
+  }
+  @media(max-width:380px) {
+    .hero { padding:22px 15px; }
+    .hero h2 { font-size:28px; }
+    .product { padding:10px; border-radius:16px; }
+    .price { font-size:21px; }
+    .modal-backdrop { padding:10px; }
+    .compare-modal { padding:16px; }
+  }
+
+
+  #sortMode:focus { outline:2px solid #d9d0ff; outline-offset:2px; }
+  #favoriteMarketChoices .chip { display:flex;align-items:center;gap:7px;cursor:pointer; }
+  #favoriteMarketChoices input { margin:0; }
+  @media(max-width:480px) {
+    .section-head { align-items:flex-start; flex-wrap:wrap; }
+    #sortMode { max-width:100%; }
+  }
+
+
+  /* Navegação por telas e lista de compras */
+  .app-screen { display:none; }
+  .app-screen.active { display:block; }
+  .screen-title { margin:26px 0 18px; }
+  .screen-title h2 { margin:0; font-size:clamp(25px,4vw,32px); letter-spacing:-1px; }
+  .screen-title p { margin:7px 0 0;color:var(--muted);font-size:13px;line-height:1.5; }
+  .add-product-btn { width:100%; margin-top:8px; border:0; border-radius:12px; padding:11px 9px; background:var(--purple);color:#fff;font-size:12px;font-weight:800; }
+  .add-product-btn.added { background:#e8f7ef;color:#087f5b;border:1px solid #c8ebd8; }
+  .list-toolbar { display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px; }
+  .view-switch { display:flex;gap:4px;padding:4px;background:#f1eff8;border-radius:12px; }
+  .view-switch button { border:0;border-radius:9px;padding:9px 12px;background:transparent;color:#6e6984;font-size:12px;font-weight:750; }
+  .view-switch button.active { background:white;color:var(--purple);box-shadow:0 2px 8px #30205c10; }
+  .list-item-card { display:flex;align-items:center;gap:11px;padding:13px 0;border-bottom:1px solid var(--line); }
+  .list-item-card:last-child { border-bottom:0; }
+  .list-check { width:19px;height:19px;accent-color:var(--purple);flex:0 0 auto; }
+  .list-item-main { flex:1;min-width:0; }
+  .list-item-main strong { display:block;font-size:13px; }
+  .list-item-main small { display:block;color:var(--muted);font-size:11px;margin-top:4px;line-height:1.4; }
+  .qty-control { display:flex;align-items:center;gap:8px; }
+  .qty-control button { width:29px;height:29px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--purple);font-weight:800; }
+  .qty-control span { min-width:14px;text-align:center;font-size:13px;font-weight:800; }
+  .remove-item { border:0;background:transparent;color:#a09bad;font-size:18px;padding:4px; }
+  .empty-list { text-align:center;padding:35px 18px;color:var(--muted); }
+  .empty-list .empty-icon { font-size:36px;margin-bottom:10px; }
+  .empty-list strong { display:block;color:var(--ink);font-size:15px;margin-bottom:6px; }
+  .empty-list p { font-size:12px;line-height:1.5;margin:0 0 15px; }
+  .list-total-strip { display:flex;align-items:center;justify-content:space-between;gap:12px;background:#f2efff;border:1px solid #e4dcff;border-radius:15px;padding:14px 15px;margin-top:15px; }
+  .list-total-strip span { color:#655b8a;font-size:12px; }
+  .list-total-strip strong { color:var(--purple);font-size:21px;letter-spacing:-.6px; }
+  .market-total-card { border:1px solid var(--line);border-radius:16px;padding:15px;margin-top:11px; }
+  .market-total-card.best-total { border-color:#bde6ce;background:#f4fbf6; }
+  .market-total-head { display:flex;align-items:center;gap:10px; }
+  .market-total-head .market-icon { flex:0 0 auto; }
+  .market-total-info { flex:1;min-width:0; }
+  .market-total-info strong { font-size:13px;display:block; }
+  .market-total-info small { display:block;color:var(--muted);font-size:11px;margin-top:4px; }
+  .market-total-price { font-size:19px;font-weight:900;white-space:nowrap;letter-spacing:-.5px; }
+  .market-total-card.best-total .market-total-price { color:var(--green); }
+  .market-badges { display:flex;gap:6px;flex-wrap:wrap;margin-top:11px; }
+  .market-badge { background:#e8f7ef;color:#087f5b;border-radius:7px;padding:5px 7px;font-size:10px;font-weight:800; }
+  .market-badge.preferred { background:#fff4d4;color:#88620a; }
+  .market-breakdown { margin-top:10px;border-top:1px solid var(--line);padding-top:9px; }
+  .market-breakdown-row { display:flex;justify-content:space-between;gap:8px;padding:5px 0;font-size:11px;color:var(--muted); }
+  .market-breakdown-row strong { color:var(--ink);white-space:nowrap; }
+  .list-note { margin-top:13px;font-size:11px;color:var(--muted);line-height:1.5; }
+  .list-screen-grid { display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:15px;align-items:start; }
+  .bottom-nav button { flex:1; }
+  @media(max-width:760px) { .list-screen-grid { grid-template-columns:1fr; } .screen-title { margin-top:22px; } }
+
+
+  .profile-panel { margin-bottom:14px; }
+  .setting-row { display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 0; }
+  .setting-row strong { display:block;font-size:13px; }
+  .setting-row small { display:block;color:var(--muted);font-size:11px;line-height:1.45;margin-top:4px;max-width:420px; }
+  .toggle { position:relative;display:inline-block;width:48px;height:28px;flex:0 0 auto; }
+  .toggle input { opacity:0;width:0;height:0; }
+  .toggle-slider { position:absolute;inset:0;cursor:pointer;background:#d7d3e2;border-radius:30px;transition:.2s; }
+  .toggle-slider:before { content:"";position:absolute;width:22px;height:22px;left:3px;top:3px;background:white;border-radius:50%;transition:.2s;box-shadow:0 1px 3px #0002; }
+  .toggle input:checked + .toggle-slider { background:var(--purple); }
+  .toggle input:checked + .toggle-slider:before { transform:translateX(20px); }
+  .fuel-settings { border-top:1px solid var(--line);padding-top:14px; }
+  .settings-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0 16px; }
+  .settings-grid label { display:flex;flex-direction:column;gap:6px;font-size:11px;color:var(--muted);font-weight:700; }
+  .settings-grid input { width:100%;min-width:0;border:1px solid var(--line);border-radius:10px;padding:11px;background:white;color:var(--ink); }
+  .fuel-settings h4 { margin:16px 0 8px;font-size:12px; }
+  .favorite-market-choices { display:flex;gap:8px;flex-wrap:wrap;margin-top:12px; }
+  .favorite-market-choices .chip { display:flex;align-items:center;gap:7px;cursor:pointer; }
+  .favorite-market-choices input { margin:0;accent-color:var(--purple); }
+  @media(max-width:420px) { .settings-grid { grid-template-columns:1fr; } }
+
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">P</div>
+      <div><h1>Preço Perto</h1><p>Compare. Economize. Compre melhor.</p></div>
+    </div>
+    <button class="location" id="locationBtn" type="button">⌖ <span id="locationText">Minha região</span> ▾</button>
+  </header>
+
+  <main>
+    <section class="app-screen active" id="homeScreen">
+    <section class="hero">
+      <div class="eyebrow">Seu dinheiro vale mais</div>
+      <h2>O melhor preço pode estar pertinho de você.</h2>
+      <p>Pesquise produtos, compare supermercados e monte sua lista de compras sem complicação.</p>
+      <form class="search" id="searchForm">
+        <input id="searchInput" type="search" placeholder="Ex.: leite, arroz, café..." aria-label="Pesquisar produto">
+        <button class="primary" type="submit">Pesquisar</button>
+      </form>
+    </section>
+
+    <div class="quick-filters" aria-label="Filtros rápidos">
+      <button class="chip active" data-filter="all">Tudo</button>
+      <button class="chip" data-filter="promo">🔥 Promoções</button>
+      <button class="chip" data-filter="fav">♥ Favoritos</button>
+      <button class="chip" data-filter="mercearia">Mercearia</button>
+      <button class="chip" data-filter="laticinios">Laticínios</button>
+      <button class="chip" data-filter="limpeza">Limpeza</button>
+    </div>
+
+
+    <section>
+      <div class="section-head">
+        <div><h3>Preços em destaque</h3><p id="resultText">Exemplos demonstrativos para visualizar o app</p></div>
+        <select id="sortMode" aria-label="Ordenar produtos" style="max-width:190px;border:1px solid var(--line);background:#fff;color:var(--purple);border-radius:11px;padding:10px 11px;font-weight:750;font-size:12px">
+          <option value="price">Menor preço</option>
+          <option value="favorite">Meus mercados favoritos</option>
+          <option value="smart">Melhor opção para mim</option>
+        </select>
+      </div>
+      <div class="product-grid" id="productGrid"></div>
+      <div class="ad-slot" aria-label="Espaço reservado para anúncio">
+        <div><strong>Espaço publicitário</strong>Área discreta para integrar anúncios aprovados do Google AdSense</div>
+      </div>
+    </section>
+
+    </section><!-- fim da tela inicial -->
+
+    <section class="app-screen" id="listScreen">
+      <div class="screen-title"><h2>🛒 Minha Lista</h2><p>Reúna seus produtos e descubra quanto sua compra pode custar em cada mercado.</p></div>
+      <div class="list-screen-grid">
+        <section class="panel">
+          <div class="list-toolbar"><div><h3>Itens da compra</h3><p class="sub" style="margin:5px 0 0">Adicione produtos pela página inicial ou digite outro item.</p></div>
+            <div class="view-switch" role="group" aria-label="Visualização da lista"><button type="button" data-list-view="detailed" class="active">Detalhada</button><button type="button" data-list-view="summary">Resumida</button></div>
+          </div>
+          <div id="shoppingList"></div>
+          <form class="add-list" id="addCustomItemForm"><input id="newItem" type="text" placeholder="Adicionar outro item" aria-label="Novo item"><button id="addItem" type="submit">Adicionar</button></form>
+          <div class="list-total-strip"><div><span id="listSummary">Sua lista está vazia.</span><div style="font-size:10px;color:#655b8a;margin-top:5px;font-weight:700">MENOR TOTAL ESTIMADO</div></div><strong id="listKnownTotal">R$ 0,00</strong></div>
+          <p class="list-note">O total é estimado com os preços demonstrativos disponíveis. Itens digitados manualmente não entram na soma até terem preço cadastrado.</p>
+        </section>
+        <section class="panel"><h3>🏪 Total por mercado</h3><p class="sub">Compare o custo dos produtos com preço disponível em cada mercado.</p><div id="marketTotals"></div></section>
+      </div>
+    </section>
+
+    <section class="app-screen" id="profileScreen">
+      <div class="screen-title"><h2>👤 Perfil</h2><p>Ajuste suas preferências para personalizar a comparação de compras.</p></div>
+      <section class="panel profile-panel">
+        <h3>⚙️ Ajustes e preferências</h3>
+        <p class="sub">Escolha como o Preço Perto deve comparar seus mercados.</p>
+        <div class="setting-row">
+          <div><strong>Calcular custo de combustível</strong><small>Inclui uma estimativa de gasolina no custo final de cada mercado.</small></div>
+          <label class="toggle"><input type="checkbox" id="fuelEnabled"><span class="toggle-slider"></span></label>
+        </div>
+        <div id="fuelSettings" class="fuel-settings" hidden>
+          <p class="sub">Informe os dados para estimar o custo de ida e volta. Você pode alterar esses valores quando quiser.</p>
+          <div class="settings-grid">
+            <label>Gasolina (R$/litro)<input id="fuelPrice" type="number" min="0" step="0.01" inputmode="decimal" value="6.00"></label>
+            <label>Consumo (km por litro)<input id="fuelEfficiency" type="number" min="0.1" step="0.1" inputmode="decimal" value="10"></label>
+          </div>
+          <h4>Distância de ida até cada mercado</h4>
+          <div class="settings-grid">
+            <label>Mercado Exemplo Centro (km)<input type="number" min="0" step="0.1" inputmode="decimal" data-distance="Mercado Exemplo Centro" value="1.2"></label>
+            <label>Supermercado Exemplo (km)<input type="number" min="0" step="0.1" inputmode="decimal" data-distance="Supermercado Exemplo" value="2.4"></label>
+            <label>Mercadinho do Bairro (km)<input type="number" min="0" step="0.1" inputmode="decimal" data-distance="Mercadinho do Bairro" value="3.1"></label>
+          </div>
+          <p class="list-note">A distância é ilustrativa nesta versão. O cálculo usa ida e volta e não considera trânsito, estacionamento ou desgaste do veículo.</p>
+        </div>
+      </section>
+      <section class="panel profile-panel">
+        <h3>★ Mercados preferidos</h3><p class="sub">A estrela identifica seus favoritos na comparação. Se não escolher nenhum, a ordenação prioriza o menor preço.</p>
+        <div id="favoriteMarketChoices" class="favorite-market-choices">
+          <label class="chip"><input type="checkbox" value="Mercado Exemplo Centro" data-market-fav> Mercado Exemplo Centro</label>
+          <label class="chip"><input type="checkbox" value="Supermercado Exemplo" data-market-fav> Supermercado Exemplo</label>
+          <label class="chip"><input type="checkbox" value="Mercadinho do Bairro" data-market-fav> Mercadinho do Bairro</label>
+        </div>
+      </section>
+      <p class="list-note">As configurações são salvas neste navegador neste protótipo. Quando houver conta de usuário, poderemos sincronizá-las entre dispositivos.</p>
+    </section>
+
+  </main>
+
+  <div class="modal-backdrop" id="compareModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <section class="compare-modal">
+      <div class="modal-header">
+        <div class="modal-heading">
+          <div class="modal-product-icon" id="modalEmoji">🛒</div>
+          <div><h3 id="modalTitle">Comparar preços</h3><p id="modalSubtitle">Confira os valores por mercado</p></div>
+        </div>
+        <button class="modal-close" id="closeCompare" type="button" aria-label="Fechar comparação">×</button>
+      </div>
+      <div class="modal-best"><span>✓ Menor preço encontrado</span><strong id="modalBestPrice">R$ 0,00</strong></div>
+      <div id="modalMarketList"></div>
+      <p class="modal-footnote">Protótipo demonstrativo: os preços e nomes dos mercados são fictícios. Na versão conectada, exibiremos a fonte e a data da última atualização de cada preço.</p>
+    </section>
+  </div>
+
+  <footer>Preço Perto · Protótipo inicial · Os preços e mercados exibidos são fictícios e não representam ofertas reais.</footer>
+</div>
+
+<nav class="bottom-nav" aria-label="Navegação principal">
+  <button class="active" data-go="homeScreen"><span>⌕</span>Início</button>
+  <button data-go="listScreen"><span>🛒</span>Minha lista <b id="navListCount" style="font-size:9px"></b></button>
+  <button data-go="profileScreen"><span>👤</span>Perfil</button>
+  <button data-go="favorites"><span>♥</span>Favoritos</button>
+</nav>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const products = [
+  {id:1,name:"Arroz tipo 1",detail:"Pacote 5 kg · Mercearia",category:"mercearia",emoji:"🍚",prices:[["Mercado Exemplo Centro",22.90],["Supermercado Exemplo",24.49],["Mercadinho do Bairro",23.50]],promo:true},
+  {id:2,name:"Leite integral",detail:"Caixa 1 L · Laticínios",category:"laticinios",emoji:"🥛",prices:[["Mercado Exemplo Centro",4.69],["Supermercado Exemplo",4.39],["Mercadinho do Bairro",4.89]],promo:false},
+  {id:3,name:"Café torrado e moído",detail:"Pacote 500 g · Mercearia",category:"mercearia",emoji:"☕",prices:[["Mercado Exemplo Centro",18.90],["Supermercado Exemplo",16.99],["Mercadinho do Bairro",19.49]],promo:true},
+  {id:4,name:"Óleo de soja",detail:"Garrafa 900 ml · Mercearia",category:"mercearia",emoji:"🫗",prices:[["Mercado Exemplo Centro",6.29],["Supermercado Exemplo",6.49],["Mercadinho do Bairro",5.99]],promo:false},
+  {id:5,name:"Detergente",detail:"Frasco 500 ml · Limpeza",category:"limpeza",emoji:"🧴",prices:[["Mercado Exemplo Centro",2.19],["Supermercado Exemplo",2.49],["Mercadinho do Bairro",2.29]],promo:true},
+  {id:6,name:"Queijo muçarela",detail:"Preço por kg · Laticínios",category:"laticinios",emoji:"🧀",prices:[["Mercado Exemplo Centro",39.90],["Supermercado Exemplo",42.90],["Mercadinho do Bairro",37.99]],promo:false}
+];
+let favorites = JSON.parse(localStorage.getItem("precoPertoFavorites") || "[]");
+let listItems = JSON.parse(localStorage.getItem("precoPertoList") || "[]").map(item=>({name:item.name,productId:item.productId || null,quantity:Math.max(1,Number(item.quantity)||1),checked:!!item.checked}));
+let listView = "detailed";
+let filter = "all", searchTerm = "", ascending = true;
+const brl = n => n.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+const grid = document.getElementById("productGrid");
+const toast = msg => { const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2300); };
+function best(p){ return [...p.prices].sort((a,b)=>a[1]-b[1])[0]; }
+function renderProducts(){
+  let shown = products.filter(p => {
+    const matchesSearch = (p.name+" "+p.detail).toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = filter==="all" || (filter==="promo" && p.promo) || (filter==="fav" && favorites.includes(p.id)) || p.category===filter;
+    return matchesSearch && matchesFilter;
+  });
+  const sortMode = document.getElementById("sortMode")?.value || "price";
+  const preferredMarkets = JSON.parse(localStorage.getItem("precoPertoPreferredMarkets") || "[]");
+  shown.sort((a,b)=>{
+    if(sortMode==="favorite" && preferredMarkets.length){
+      const aPreferred = preferredMarkets.includes(best(a)[0]) ? 0 : 1;
+      const bPreferred = preferredMarkets.includes(best(b)[0]) ? 0 : 1;
+      if(aPreferred!==bPreferred) return aPreferred-bPreferred;
+    }
+    if(sortMode==="smart" && preferredMarkets.length){
+      const aPrices=a.prices.filter(x=>preferredMarkets.includes(x[0])).sort((x,y)=>x[1]-y[1]);
+      const bPrices=b.prices.filter(x=>preferredMarkets.includes(x[0])).sort((x,y)=>x[1]-y[1]);
+      const aCost=aPrices.length?aPrices[0][1]:best(a)[1]+100000;
+      const bCost=bPrices.length?bPrices[0][1]:best(b)[1]+100000;
+      if(aCost!==bCost) return aCost-bCost;
+    }
+    return best(a)[1]-best(b)[1];
+  });
+  document.getElementById("resultText").textContent = shown.length ? `${shown.length} produto(s) · preços fictícios para demonstração` : "Nenhum produto encontrado. Tente outro termo.";
+  grid.innerHTML = shown.map(p => {
+    const b=best(p);
+    const max=Math.max(...p.prices.map(x=>x[1]));
+    return `<article class="product">
+      <div class="product-top"><div class="product-emoji">${p.emoji}</div><button class="fav ${favorites.includes(p.id)?"on":""}" data-fav="${p.id}" aria-label="Favoritar ${p.name}" title="Favoritar">${favorites.includes(p.id)?"♥":"♡"}</button></div>
+      <h4>${p.name}</h4><p class="detail">${p.detail}</p>
+      <div class="best-price"><span class="price">${brl(b[1])}</span>${p.promo?'<span class="save">OFERTA</span>':""}</div>
+      <div class="market-line"><span>Menor em ${b[0]}</span><span>${Math.round((max-b[1])*100)/100>0?`dif. até ${brl(max-b[1])}`:""}</span></div>
+      <button class="add-product-btn ${listItems.some(item=>item.productId===p.id)?"added":""}" data-add-product="${p.id}">${listItems.some(item=>item.productId===p.id)?"✓ Na minha lista":"＋ Adicionar à lista"}</button>
+      <button class="compare-btn" style="margin-top:8px" data-compare="${p.id}">Comparar mercados</button>
+      <div class="compare-panel" id="compare-${p.id}">${[...p.prices].sort((a,b)=>a[1]-b[1]).map((x,i)=>`<div class="compare-row"><span>${i===0?"✓ ":""}${x[0]}</span><strong>${brl(x[1])}</strong></div>`).join("")}<p class="note">Valores ilustrativos. No app real, cada preço terá origem e data de atualização.</p></div>
+    </article>`;
+  }).join("");
+  grid.querySelectorAll("[data-fav]").forEach(btn=>btn.addEventListener("click",()=>{
+    const id=Number(btn.dataset.fav);
+    favorites=favorites.includes(id)?favorites.filter(x=>x!==id):[...favorites,id];
+    localStorage.setItem("precoPertoFavorites",JSON.stringify(favorites)); renderProducts();
+  }));
+  grid.querySelectorAll("[data-add-product]").forEach(btn=>btn.addEventListener("click",()=>{
+    const id=Number(btn.dataset.addProduct), product=products.find(x=>x.id===id);
+    const existing=listItems.find(item=>item.productId===id);
+    if(existing){ existing.quantity++; existing.checked=false; toast(`${product.name}: quantidade atualizada na lista.`); }
+    else { listItems.push({name:product.name,productId:id,quantity:1,checked:false}); toast(`${product.name} adicionado à sua lista.`); }
+    saveList();renderList();renderProducts();
+  }));
+  grid.querySelectorAll("[data-compare]").forEach(btn=>btn.addEventListener("click",()=>{
+    const p=products.find(item=>item.id===Number(btn.dataset.compare));
+    if(!p) return;
+    const prices=[...p.prices].sort((a,b)=>a[1]-b[1]);
+    document.getElementById("modalEmoji").textContent=p.emoji;
+    document.getElementById("modalTitle").textContent=p.name;
+    document.getElementById("modalSubtitle").textContent=p.detail+" · comparação por mercado";
+    document.getElementById("modalBestPrice").textContent=brl(prices[0][1]);
+    document.getElementById("modalMarketList").innerHTML=prices.map((x,i)=>`<div class="modal-market-row ${i===0?"winner":""}"><div class="market-rank">${i===0?"✓":String(i+1).padStart(2,"0")}</div><div class="modal-market-name">${escapeHtml(x[0])}<small>${i===0?"Menor preço deste exemplo":"Preço demonstrativo"}</small></div><div class="modal-market-price">${brl(x[1])}</div></div>`).join("");
+    document.getElementById("compareModal").classList.add("open");
+    document.body.style.overflow="hidden";
+    document.getElementById("closeCompare").focus();
+  }));
+}
+function renderList(){
+  const root=document.getElementById("shoppingList");
+  const count=document.getElementById("navListCount");
+  if(count) count.textContent=listItems.length?`(${listItems.length})`:"";
+  if(!listItems.length){
+    root.innerHTML='<div class="empty-list"><div class="empty-icon">🛒</div><strong>Sua lista está esperando por você</strong><p>Adicione produtos pelos cartões de preços em destaque ou digite um item abaixo.</p><button type="button" class="compare-btn" id="browseProducts">Explorar produtos</button></div>';
+    document.getElementById("browseProducts")?.addEventListener("click",()=>showScreen("homeScreen"));
+  } else {
+    root.innerHTML=listItems.map((item,i)=>{
+      const product=products.find(p=>p.id===item.productId);
+      const bestPrice=product?brl(best(product)[1]*item.quantity):"Sem preço";
+      if(listView==="summary") return `<div class="list-item-card"><input class="list-check" type="checkbox" data-check="${i}" ${item.checked?"checked":""} aria-label="Marcar ${escapeHtml(item.name)}"><div class="list-item-main"><strong style="${item.checked?"text-decoration:line-through;color:#999":""}">${escapeHtml(item.name)} <span style="color:var(--muted);font-weight:500">× ${item.quantity}</span></strong></div><strong style="font-size:12px;white-space:nowrap">${bestPrice}</strong><button class="remove-item" data-remove="${i}" aria-label="Remover item">×</button></div>`;
+      return `<div class="list-item-card"><input class="list-check" type="checkbox" data-check="${i}" ${item.checked?"checked":""} aria-label="Marcar ${escapeHtml(item.name)}"><div class="list-item-main"><strong style="${item.checked?"text-decoration:line-through;color:#999":""}">${escapeHtml(item.name)}</strong><small>${product?`Menor preço unitário: ${brl(best(product)[1])} · ${best(product)[0]}`:"Preço ainda não cadastrado para este item"}</small></div><div class="qty-control"><button type="button" data-qty="${i}" data-delta="-1" aria-label="Diminuir quantidade">−</button><span>${item.quantity}</span><button type="button" data-qty="${i}" data-delta="1" aria-label="Aumentar quantidade">+</button></div><button class="remove-item" data-remove="${i}" aria-label="Remover item">×</button></div>`;
+    }).join("");
+  }
+  const checked=listItems.filter(x=>x.checked).length;
+  const known=listItems.filter(x=>products.some(p=>p.id===x.productId));
+  const cheapestProductsTotal=known.reduce((sum,item)=>sum+best(products.find(p=>p.id===item.productId))[1]*item.quantity,0);
+  const fuelEnabled=localStorage.getItem("precoPertoFuelEnabled")==="true";
+  const cheapestTotal=cheapestProductsTotal;
+  document.getElementById("listSummary").textContent=`${listItems.length} item(ns) · ${checked} comprado(s)`;
+  document.getElementById("listKnownTotal").textContent=brl(cheapestTotal);
+  const totalLabel=document.querySelector(".list-total-strip div div"); if(totalLabel)totalLabel.textContent="MENOR TOTAL DOS PRODUTOS";
+  root.querySelectorAll("[data-check]").forEach(el=>el.addEventListener("change",()=>{listItems[Number(el.dataset.check)].checked=el.checked;saveList();renderList();}));
+  root.querySelectorAll("[data-remove]").forEach(el=>el.addEventListener("click",()=>{listItems.splice(Number(el.dataset.remove),1);saveList();renderList();renderProducts();}));
+  root.querySelectorAll("[data-qty]").forEach(el=>el.addEventListener("click",()=>{const item=listItems[Number(el.dataset.qty)];item.quantity=Math.max(1,item.quantity+Number(el.dataset.delta));saveList();renderList();}));
+  renderMarketTotals();
+}
+function renderMarketTotals(){
+  const root=document.getElementById("marketTotals"); if(!root)return;
+  const preferred=JSON.parse(localStorage.getItem("precoPertoPreferredMarkets")||"[]");
+  const fuelEnabled=localStorage.getItem("precoPertoFuelEnabled")==="true";
+  const fuelPrice=Math.max(0,Number(document.getElementById("fuelPrice")?.value ?? localStorage.getItem("precoPertoFuelPrice") ?? 6));
+  const efficiency=Math.max(0.1,Number(document.getElementById("fuelEfficiency")?.value ?? localStorage.getItem("precoPertoFuelEfficiency") ?? 10));
+  const distances={};
+  document.querySelectorAll("[data-distance]").forEach(el=>distances[el.dataset.distance]=Math.max(0,Number(el.value)||0));
+  if(!listItems.length){root.innerHTML='<div class="empty-list" style="padding:24px 10px"><div class="empty-icon">📊</div><strong>Adicione itens para comparar</strong><p>Os totais estimados de cada mercado aparecerão aqui.</p></div>';return;}
+  const totals=["Mercado Exemplo Centro","Supermercado Exemplo","Mercadinho do Bairro"].map((market,index)=>{
+    let total=0,covered=0,missing=0,lines=[];
+    listItems.forEach(item=>{const p=products.find(x=>x.id===item.productId);if(!p){missing++;return;}const price=p.prices.find(x=>x[0]===market);if(!price){missing++;return;}total+=price[1]*item.quantity;covered++;lines.push({name:item.name,qty:item.quantity,price:price[1]*item.quantity});});
+    const distance=distances[market] ?? ({"Mercado Exemplo Centro":1.2,"Supermercado Exemplo":2.4,"Mercadinho do Bairro":3.1}[market]);
+    const fuelCost=fuelEnabled ? (2*distance/efficiency)*fuelPrice : 0;
+    return {market,index,total,covered,missing,lines,isPreferred:preferred.includes(market),distance,fuelCost,finalTotal:total+fuelCost};
+  });
+  const bestTotal=totals.filter(x=>x.covered>0).sort((a,b)=>a.finalTotal-b.finalTotal)[0];
+  totals.sort((a,b)=>{if(a.covered===0&&b.covered>0)return 1;if(b.covered===0&&a.covered>0)return -1;return a.finalTotal-b.finalTotal;});
+  root.innerHTML=totals.map(t=>`<article class="market-total-card ${bestTotal&&t.market===bestTotal.market?"best-total":""}"><div class="market-total-head"><div class="market-icon">${["🏪","🛍️","🏬"][t.index]}</div><div class="market-total-info"><strong>${escapeHtml(t.market)} ${t.isPreferred?"<span title='Mercado preferido' style='color:#d69b00'>★</span>":""}</strong><small>${t.covered} de ${listItems.length} item(ns) com preço</small></div><div class="market-total-price">${t.covered?brl(t.finalTotal):"—"}</div></div><div class="market-badges">${bestTotal&&t.market===bestTotal.market?'<span class="market-badge">MENOR TOTAL</span>':""}${t.isPreferred?'<span class="market-badge preferred">★ SEU FAVORITO</span>':""}${t.missing?`<span class="market-badge" style="background:#f2f0f7;color:#716c84">${t.missing} sem preço</span>`:""}</div>${fuelEnabled?`<div class="market-breakdown-row"><span>Combustível · ${t.distance.toLocaleString("pt-BR")} km ida + volta</span><strong>${brl(t.fuelCost)}</strong></div><div class="market-breakdown-row"><span>Produtos</span><strong>${t.covered?brl(t.total):"—"}</strong></div>`:""}${listView==="detailed"&&t.lines.length?`<div class="market-breakdown">${t.lines.map(line=>`<div class="market-breakdown-row"><span>${escapeHtml(line.name)} × ${line.qty}</span><strong>${brl(line.price)}</strong></div>`).join("")}</div>`:""}</article>`).join("");
+}
+
+function showScreen(screenId){
+  document.querySelectorAll(".app-screen").forEach(s=>s.classList.toggle("active",s.id===screenId));
+  document.querySelectorAll("[data-go]").forEach(b=>b.classList.toggle("active",b.dataset.go===screenId||(b.dataset.go==="favorites"&&screenId==="homeScreen"&&filter==="fav")));
+  window.scrollTo({top:0,behavior:"smooth"});
+  if(screenId==="listScreen")renderList();
+}
+
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function saveList(){localStorage.setItem("precoPertoList",JSON.stringify(listItems));}
+document.getElementById("searchForm").addEventListener("submit",e=>{e.preventDefault();searchTerm=document.getElementById("searchInput").value.trim();renderProducts();showScreen("homeScreen");document.querySelector(".section-head").scrollIntoView({behavior:"smooth",block:"start"});});
+document.querySelectorAll("[data-filter]").forEach(btn=>btn.addEventListener("click",()=>{filter=btn.dataset.filter;document.querySelectorAll("[data-filter]").forEach(b=>b.classList.toggle("active",b===btn));renderProducts();showScreen("homeScreen");}));
+document.getElementById("sortMode").addEventListener("change",renderProducts);
+const fuelToggle=document.getElementById("fuelEnabled");
+const fuelSettings=document.getElementById("fuelSettings");
+fuelToggle.checked=localStorage.getItem("precoPertoFuelEnabled")==="true";
+fuelSettings.hidden=!fuelToggle.checked;
+const savedFuelPrice=localStorage.getItem("precoPertoFuelPrice"); if(savedFuelPrice!==null)document.getElementById("fuelPrice").value=savedFuelPrice;
+const savedEfficiency=localStorage.getItem("precoPertoFuelEfficiency"); if(savedEfficiency!==null)document.getElementById("fuelEfficiency").value=savedEfficiency;
+const savedDistances=JSON.parse(localStorage.getItem("precoPertoFuelDistances")||"{}");
+document.querySelectorAll("[data-distance]").forEach(el=>{if(savedDistances[el.dataset.distance]!==undefined)el.value=savedDistances[el.dataset.distance];});
+fuelToggle.addEventListener("change",()=>{localStorage.setItem("precoPertoFuelEnabled",String(fuelToggle.checked));fuelSettings.hidden=!fuelToggle.checked;renderMarketTotals();toast(fuelToggle.checked?"Cálculo de combustível ativado.":"Cálculo de combustível desativado.");});
+function saveFuelSettings(){
+  localStorage.setItem("precoPertoFuelPrice",document.getElementById("fuelPrice").value);
+  localStorage.setItem("precoPertoFuelEfficiency",document.getElementById("fuelEfficiency").value);
+  const distances={};document.querySelectorAll("[data-distance]").forEach(el=>distances[el.dataset.distance]=Number(el.value)||0);
+  localStorage.setItem("precoPertoFuelDistances",JSON.stringify(distances));renderMarketTotals();
+}
+document.querySelectorAll("#fuelPrice,#fuelEfficiency,[data-distance]").forEach(el=>el.addEventListener("input",saveFuelSettings));
+const savedPreferredMarkets=JSON.parse(localStorage.getItem("precoPertoPreferredMarkets") || "[]");
+document.querySelectorAll("[data-market-fav]").forEach(input=>{
+  input.checked=savedPreferredMarkets.includes(input.value);
+  input.addEventListener("change",()=>{
+    const selected=[...document.querySelectorAll("[data-market-fav]:checked")].map(el=>el.value);
+    localStorage.setItem("precoPertoPreferredMarkets",JSON.stringify(selected));
+    const mode=document.getElementById("sortMode");
+    if(selected.length && mode.value==="price") mode.value="favorite";
+    if(!selected.length && mode.value!=="price") mode.value="price";
+    renderProducts();renderMarketTotals();
+    toast(selected.length ? "Preferências de mercado salvas neste navegador." : "Preferências removidas; menor preço será priorizado.");
+  });
+});
+document.getElementById("addCustomItemForm").addEventListener("submit",e=>{e.preventDefault();const input=document.getElementById("newItem"),name=input.value.trim();if(!name)return;listItems.push({name,productId:null,quantity:1,checked:false});saveList();renderList();input.value="";input.focus();});
+document.querySelectorAll("[data-list-view]").forEach(btn=>btn.addEventListener("click",()=>{listView=btn.dataset.listView;document.querySelectorAll("[data-list-view]").forEach(b=>b.classList.toggle("active",b===btn));renderList();}));
+document.getElementById("locationBtn").addEventListener("click",()=>{
+  if(!navigator.geolocation){toast("Seu navegador não disponibilizou a localização.");return;}
+  document.getElementById("locationText").textContent="Localizando…";
+  navigator.geolocation.getCurrentPosition(pos=>{
+    document.getElementById("locationText").textContent=`${pos.coords.latitude.toFixed(2)}, ${pos.coords.longitude.toFixed(2)}`;
+    toast("Localização autorizada neste protótipo. Ainda não busca mercados reais.");
+  },()=>{document.getElementById("locationText").textContent="Minha região";toast("Localização não autorizada. Você pode continuar sem ela.");},{timeout:8000});
+});
+document.querySelectorAll("[data-go]").forEach(btn=>btn.addEventListener("click",()=>{
+  const go=btn.dataset.go;
+  if(go==="favorites") { filter="fav";document.querySelectorAll("[data-filter]").forEach(b=>b.classList.toggle("active",b.dataset.filter==="fav"));renderProducts();showScreen("homeScreen"); }
+  else showScreen(go);
+}));
+
+const compareModal = document.getElementById("compareModal");
+function closeCompareModal(){compareModal.classList.remove("open");document.body.style.overflow="";}
+document.getElementById("closeCompare").addEventListener("click",closeCompareModal);
+compareModal.addEventListener("click",e=>{if(e.target===compareModal)closeCompareModal();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&compareModal.classList.contains("open"))closeCompareModal();});
+
+renderProducts();renderList();
+</script>
+</body>
+</html>
